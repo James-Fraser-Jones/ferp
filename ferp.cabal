@@ -35,6 +35,7 @@ library
       base >=4.7 && <5
     , containers
     , gloss
+    , mtl
   default-language: Haskell2010
 
 executable ferp-exe
@@ -49,6 +50,7 @@ executable ferp-exe
     , containers
     , ferp
     , gloss
+    , mtl
   default-language: Haskell2010
 
 test-suite ferp-test
@@ -64,4 +66,5 @@ test-suite ferp-test
     , containers
     , ferp
     , gloss
+    , mtl
   default-language: Haskell2010

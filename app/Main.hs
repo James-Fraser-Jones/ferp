@@ -8,7 +8,8 @@ import Graphics.Gloss.Interface.Pure.Game
 import Data.Map (Map)
 import qualified Data.Map as Map
 
-import Debug.Trace
+--import Debug.Trace
+import Control.Monad.Reader
 
 --------------------------------------------------------------------------------------------------------------------------------------
 --types
@@ -21,7 +22,7 @@ data Input = Input {mouse :: Mouse, keyboard :: Keyboard} deriving (Show)
 newtype Keyboard = Keyboard {unKeyboard :: Map Key KeyState} deriving (Show)
 data Mouse = Mouse {position :: (Float, Float), left :: KeyState, right :: KeyState, middle :: KeyState, wheel :: Int} deriving (Show)
 
-newtype Signal a = Signal {unSignal :: Input -> a}
+type Signal a = Reader Input a
 
 --------------------------------------------------------------------------------------------------------------------------------------
 --settings
@@ -47,14 +48,8 @@ displaySettings = InWindow windowName windowSize (200, 200)
 initWorld :: World
 initWorld = World (Input (Mouse (0,0) Up Up Up 0) (Keyboard Map.empty)) (Output blank)
 
-main :: IO ()
-main = play displaySettings background fps initWorld 
-  (\w -> unOutput $ output w) 
-  (\e w -> w {input = updateInput e $ input w, output = unSignal outputSignal $ input w}) 
-  (\_ w -> w)
-
 updateInput :: Event -> Input -> Input
-updateInput e i = traceShow i $ case e of 
+updateInput e i = case e of --traceShow i $ 
   EventKey k s _ _ -> case k of
     MouseButton m -> case m of
       LeftButton -> i {mouse = (mouse i) {left = s}}
@@ -67,9 +62,21 @@ updateInput e i = traceShow i $ case e of
   EventMotion p -> i {mouse = (mouse i) {position = p}}
   _ -> i
 
+main :: IO ()
+main = play displaySettings background fps initWorld 
+  (\w -> unOutput $ output w) 
+  (\e w -> w {input = updateInput e $ input w, output = runReader main' $ input w}) 
+  (\_ w -> w)
+
 --------------------------------------------------------------------------------------------------------------------------------------
 --signals
 
-outputSignal :: Signal Output
-outputSignal = Signal $ \i -> 
-  Output $ Color red $ Circle 400
+main' :: Signal Output
+main' = do
+  i <- ask
+  let (x, y) = position $ mouse i
+      (w, h) = (fromIntegral $ fst windowSize, fromIntegral $ snd windowSize)
+      r = (x + w/2)/w
+      g = (y + h/2)/h
+      c = makeColor r g 0 1
+  return $ Output $ Color c $ thickCircle 0 200
