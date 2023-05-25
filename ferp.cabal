@@ -25,7 +25,10 @@ source-repository head
 
 library
   exposed-modules:
+      Keyboard
       Lib
+      Settings
+      Types
   other-modules:
       Paths_ferp
   hs-source-dirs:
