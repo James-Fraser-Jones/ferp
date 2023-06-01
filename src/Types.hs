@@ -1,4 +1,4 @@
-module Types (Keyboard, Mouse(..), Input(..), Signal) where
+module Types (Keyboard, Mouse(..), Input(..), Signal, Time) where
 
 import Control.Monad.Reader (Reader)
 import Graphics.Gloss.Interface.Pure.Game (KeyState)
@@ -11,6 +11,8 @@ import Keyboard (Keyboard) --Keyboard type is purposefully opaque, no constructo
 data Mouse = Mouse {position :: (Float, Float), left :: KeyState, right :: KeyState, middle :: KeyState, wheel :: Int}
 data Input = Input {mouse :: Mouse, keyboard :: Keyboard}
 
-type Signal a = Reader Input a
+type Signal a = Reader Time a
+
+type Time = Float
 
 -----------------------------------------------------------------------------

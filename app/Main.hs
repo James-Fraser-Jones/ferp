@@ -9,13 +9,17 @@ import qualified Keyboard as Kb (empty, insert)
 
 import Lib as Lib (main)
 
-data World = World {input :: Input, output :: Picture}
+data World = World {input :: Input, output :: Picture, time :: Time}
 
 main :: IO ()
-main = play displaySettings background fps initWorld 
-  output
-  (\e w -> w {input = updateInput e $ input w, output = runReader Lib.main $ input w}) 
-  (const id)
+main = play displaySettings background fps initWorld output handleEvent handleTime
+
+handleEvent :: Event -> World -> World
+handleEvent event world = world {input = newinput, output = runReader (Lib.main $ pure newinput) $ time world}
+  where newinput = updateInput event $ input world
+
+handleTime :: Time -> World -> World
+handleTime delta world = world {time = time world + delta}
 
 updateInput :: Event -> Input -> Input
 updateInput e i = case e of
@@ -32,7 +36,7 @@ updateInput e i = case e of
   _ -> i
 
 initWorld :: World
-initWorld = World (Input (Mouse (0,0) Up Up Up 0) Kb.empty) blank
+initWorld = World (Input (Mouse (0,0) Up Up Up 0) Kb.empty) blank 0
 
 displaySettings :: Display
 displaySettings = InWindow windowName windowSize windowOffset
